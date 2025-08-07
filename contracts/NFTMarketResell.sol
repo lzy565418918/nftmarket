@@ -70,11 +70,10 @@ contract NFTMarketResell is IERC721Receiver, ReentrancyGuard, Ownable {
         nft = _nft;
     }
 
-    function listSale(uint256 tokenId, uint256 price)
-        public
-        payable
-        nonReentrant
-    {
+    function listSale(
+        uint256 tokenId,
+        uint256 price
+    ) public payable nonReentrant {
         require(nft.ownerOf(tokenId) == msg.sender, "NFT not yours");
         require(vaultItems[tokenId].tokenId == 0, "NFT already listed");
         require(price > 0, "Amount must be higher than 0");
