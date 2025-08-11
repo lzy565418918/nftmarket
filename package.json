@@ -9,19 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroui/react": "^2.8.2",
     "@metamask/detect-provider": "^2.0.0",
     "@nextui-org/react": "^2.6.11",
+    "framer-motion": "^12.23.12",
+    "ipfs-http-client": "^60.0.1",
     "next": "15.4.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "sf-font": "^1.0.0",
     "simple-crypto-js": "^3.0.1",
+    "web3": "^4.16.0",
     "web3modal": "^1.9.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
     "@tailwindcss/postcss": "^4",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
