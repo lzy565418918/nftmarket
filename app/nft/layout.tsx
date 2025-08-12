@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '@heroui/button';
 
-const Page = ({ children }: { children: React.ReactNode }) => {
+const NftLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 24 }}>
@@ -18,4 +18,4 @@ const Page = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default Page;
+export default NftLayout;

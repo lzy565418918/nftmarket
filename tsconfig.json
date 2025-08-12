@@ -18,6 +18,9 @@
     "moduleResolution": "node",
     "isolatedModules": true,
     "jsx": "preserve",
+    "paths": {
+      "@/*": ["./*"] // 配置 @ 别名，指向 root 目录
+    },
     "plugins": [
       {
         "name": "next"
