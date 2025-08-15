@@ -29,11 +29,31 @@ export const cipherHH = simpleCrypto.encrypt(hhraw)
 HardHat 测试网
 */
 
-export const hhresell = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-export const hhnftcol = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+export const hhresell = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+export const hhnftcol = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const hhrpc = "http://localhost:8545";
 
 /*
 全局参数
 */
 export const mainnet = hhrpc
+/*
+NETWORK RPC ADDRESSES, Choose one then 
+change the value of "hhrpc" below.
+*/
+// var mumbai = 'https://matic-mumbai.chainstacklabs.com';
+// var goerli = 'https://rpc.ankr.com/eth_goerli';
+// var rinkeby = 'https://rpc.ankr.com/eth_rinkeby';
+
+// /*
+// CHANGE THIS TO YOUR PREFERRED TESTNET
+// */
+// var hhrpc = goerli;
+// /*
+// Global Parameters
+// */
+// export var mainnet = hhrpc
+
+// /*
+// DON'T FORGET TO SAVE!
+// */
