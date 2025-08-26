@@ -28,9 +28,14 @@ export const cipherHH = simpleCrypto.encrypt(hhraw)
 /*
 HardHat 测试网
 */
-
-export const hhresell = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-export const hhnftcol = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// 转售市场
+export const hhresell = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+// 收集NFT
+export const hhnftcol = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+// NFT 合约，创作者用来创作的
+export const hhnft = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+// NFT 市场，只有创作出来的NFT第一次放在市场上卖，和转售市场不一样
+export const hhmarket = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const hhrpc = "http://localhost:8545";
 
 /*
