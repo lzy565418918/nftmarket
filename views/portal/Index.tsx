@@ -27,7 +27,8 @@ export default function Sell() {
   const connectUser = async () => {
     if (window.ethereum) {
       const web3 = new Web3(window.ethereum); // 创建 web3 实例
-      await window.ethereum.send('eth_requestAccounts'); // 请求钱包授权
+      // await window.ethereum.send('eth_requestAccounts'); // 请求钱包授权（已废弃）
+      await window.ethereum.request({ method: 'eth_requestAccounts' }); // 推荐用法
       const accounts = await web3.eth.getAccounts(); // 获取钱包地址列表
       const account = accounts[0]; // 取第一个地址
       setUser(account); // 设置当前用户
