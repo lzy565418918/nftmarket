@@ -43,9 +43,13 @@ const hhrpc = "http://localhost:8545";
 */
 export const mainnet = hhrpc
 /*
+
 NETWORK RPC ADDRESSES, Choose one then 
 change the value of "hhrpc" below.
 */
+
+import {create as ipfsHttpClient} from 'ipfs-http-client'
+export const client = ipfsHttpClient({ url: 'https://ipfs.infura.io:5001/api/v0' })
 // var mumbai = 'https://matic-mumbai.chainstacklabs.com';
 // var goerli = 'https://rpc.ankr.com/eth_goerli';
 // var rinkeby = 'https://rpc.ankr.com/eth_rinkeby';
