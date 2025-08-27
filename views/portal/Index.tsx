@@ -161,7 +161,7 @@ export default function Sell() {
                     alt={nft.name}
                     width={180}
                     height={180}
-                    className="w-full h-[180px] object-cover rounded mb-3"
+                    className="w-[180px] h-[180px] object-cover rounded mb-3"
                     unoptimized
                   /> {/* NFT 图片 */}
                   <h3 className="text-[#9D00FF] font-sans text-lg m-0 mb-2">Owned by You</h3> {/* 持有者标识 */}
