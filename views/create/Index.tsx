@@ -1,18 +1,27 @@
+"use client"
+
 import { ethers } from 'ethers';
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation'; // 修正导入
 import Web3Modal from "web3modal";
 import { NFT, Market } from '@/abis';
-import { hhnft, hhmarket, client } from '@/engine/configuration';
+import { hhnft, hhmarket } from '@/engine/configuration';
 import 'sf-font';
+import { create as ipfsHttpClient, IPFSHTTPClient } from 'ipfs-http-client';
 
 export default function createMarket() {
+  const [client, setClient] = useState<IPFSHTTPClient>()
   const [fileUrl, setFileUrl] = useState('')
   const [formInput, updateFormInput] = useState({ price: '', name: '', description: '' })
   const router = useRouter()
+  useEffect(() => {
+    const _client = ipfsHttpClient({ url: 'https://ipfs.infura.io:5001/api/v0' })
+    setClient(_client)
+  }, []) // 加上依赖数组，避免重复执行
+
   const onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0 || !client) return;
     const file = files[0];
     try {
       const added = await client.add(
@@ -30,7 +39,7 @@ export default function createMarket() {
 
   const createMarket = async () => {
     const { name, description, price } = formInput
-    if (!name || !description || !price || !fileUrl) return
+    if (!name || !description || !price || !fileUrl || !client) return
     const data = JSON.stringify({
       name, description, image: fileUrl
     })
@@ -65,7 +74,7 @@ export default function createMarket() {
 
   const buyNFT = async () => {
     const { name, description } = formInput
-    if (!name || !description || !fileUrl) return
+    if (!name || !description || !fileUrl || !client) return
     const data = JSON.stringify({
       name, description, image: fileUrl
     })
