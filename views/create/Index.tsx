@@ -15,7 +15,11 @@ export default function createMarket() {
   const [formInput, updateFormInput] = useState({ price: '', name: '', description: '' })
   const router = useRouter()
   useEffect(() => {
-    const _client = ipfsHttpClient({ url: 'https://ipfs.infura.io:5001/api/v0' })
+    const _client = ipfsHttpClient({
+      host: "localhost",
+      port: 5001,
+      protocol: "http",
+    })
     setClient(_client)
   }, []) // 加上依赖数组，避免重复执行
 
@@ -30,7 +34,7 @@ export default function createMarket() {
           progress: (prog) => console.log(`received: ${prog}`)
         }
       )
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`
+      const url = `http://localhost:8080/ipfs/${added.path}`
       setFileUrl(url)
     } catch (error) {
       console.log('Error uploading file: ', error)
@@ -45,7 +49,7 @@ export default function createMarket() {
     })
     try {
       const added = await client.add(data)
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`
+      const url = `http://localhost:8080/ipfs/${added.path}`
       createNFT(url)
     } catch (error) {
       console.log('Error uploading file: ', error)
@@ -60,13 +64,13 @@ export default function createMarket() {
     let contract = new ethers.Contract(hhnft, NFT, signer)
     let transaction = await contract.createNFT(url)
     const tx = await transaction.wait()
-    const event = tx.events[0]
+    const event = tx.logs[0]
     const value = event.args[2]
-    const tokenId = value.toNumber()
+    const tokenId = Number(value)
     const price = ethers.parseUnits(formInput.price, 'ether')
     contract = new ethers.Contract(hhmarket, Market, signer)
-    let listingFee = await contract.listingFee()
-    listingFee = listingFee.toString()
+    const listingFee = await contract.getListingFee()
+    console.log(hhnft, tokenId, price, listingFee)
     transaction = await contract.createVaultItem(hhnft, tokenId, price, { value: listingFee })
     await transaction.wait()
     router.push('/')
@@ -80,7 +84,7 @@ export default function createMarket() {
     })
     try {
       const added = await client.add(data)
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`
+      const url = `http://localhost:8080/ipfs/${added.path}`
       mintNFT(url)
     } catch (error) {
       console.log('Error uploading file: ', error)
@@ -107,13 +111,11 @@ export default function createMarket() {
           <div className="flex-1 min-w-[280px]">
             <h3 className="text-xl text-[#39FF14] font-semibold mb-2">The NFT Marketplace with a Reward.</h3>
             <h3 className="text-xl text-[#9D00FF] font-semibold mb-4">N2DR IS More Than A Token</h3>
-            <img src='n2dr-logo.png' width="300" className="rounded shadow mb-6" alt="logo" />
           </div>
           <div className="flex-1 min-w-[280px]">
             <div className="bg-black/40 rounded-lg p-4 mb-4 shadow">
               <span className="text-white">Select your Preferred Network, Create your Amazing NFT by uploading your art using the simple NFT Dashboard. Simple!</span>
             </div>
-            <img src='chainagnostic.png' className="rounded shadow mb-4" alt="chain" />
             <div className="bg-black/40 rounded-lg p-4 shadow">
               <span className="text-white">Chain-Agnostic Marketplace that allows you to sell your NFT and accept your favorite crypto as payment! No borders, No restrictions. Simple!</span>
             </div>
@@ -138,6 +140,7 @@ export default function createMarket() {
                   type="file"
                   name="Asset"
                   className="w-full text-white mb-2"
+                  placeholder="select file please"
                   onChange={onChange}
                 />
                 {fileUrl && (
