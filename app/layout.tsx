@@ -2,10 +2,9 @@
 
 // globals.css includes @tailwind directives
 // adjust the path if necessary
-import "./globals.css";
 import { Providers } from "./providers";
 import Link from 'next/link';
-import { Button } from '@heroui/button';
+import { Button } from '@heroui/react';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,10 +13,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 24 }}>
             <Link href="/">
-              <Button>market</Button>
+              <Button color="primary">market</Button>
+            </Link>
+            <Link href="/create">
+              <Button color="primary">create portal</Button>
             </Link>
             <Link href="/portal">
-              <Button>my portal</Button>
+              <Button color="primary">my portal</Button>
             </Link>
           </div>
           {children}
