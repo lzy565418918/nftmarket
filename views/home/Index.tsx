@@ -3,10 +3,9 @@ import { ethers } from 'ethers'; // ethers.js 用于与以太坊交互
 import { useEffect, useState } from 'react'; // React 状态和生命周期钩子
 import Web3Modal from "web3modal"; // 钱包连接弹窗库
 import { useRouter } from 'next/navigation'; // Next.js 路由跳转
-import NFTCollection from '@/engine/NFTCollection.json' // NFTCollection 合约 ABI
-import Resell from '@/engine/Resell.json'; // Resell 合约 ABI
+import { NFTMarketResell, Collection, NFT, Market } from '@/abis' // NFTCollection 合约 ABI
 import { Button, Spacer, Image as HeroImage } from '@heroui/react'; // heroui 组件库
-import { hhresell, hhnftcol, mainnet } from '@/engine/configuration'; // 合约地址和网络配置
+import { hhnft, hhmarket, hhresell, hhnftcol, mainnet } from '@/engine/configuration'; // 合约地址和网络配置
 import { cipherHH, simpleCrypto } from '@/engine/configuration'; // 加密配置
 import confetti from 'canvas-confetti'; // 彩带动画库
 import 'sf-font'; // 字体库（未启用）
@@ -17,8 +16,10 @@ import { NftItem } from '@/utils/types' // NFT 数据类型
 // 首页主组件
 export default function Home() {
   const [hhlist, hhResellNfts] = useState<NftItem[]>([]) // NFT 列表
+  const [hhnfts, hhsetNfts] = useState<(NftItem & { price: string })[]>([]) // NFT 列表
   useEffect(() => {
     loadHardHatResell() // 页面加载时获取NFT列表
+    loadNewSaleNFTs()
   }, []) // 只在首次渲染时执行
   const router = useRouter() // 路由跳转实例
 
@@ -27,8 +28,8 @@ export default function Home() {
     const provider = new ethers.JsonRpcProvider(mainnet) // 创建RPC提供者
     const key = simpleCrypto.decrypt(cipherHH) as string // 解密私钥
     const wallet = new ethers.Wallet(key, provider); // 创建钱包实例
-    const contract = new ethers.Contract(hhnftcol, NFTCollection, wallet); // NFTCollection合约实例
-    const market = new ethers.Contract(hhresell, Resell, wallet); // Resell市场合约实例
+    const contract = new ethers.Contract(hhnftcol, Collection, wallet); // NFTCollection合约实例
+    const market = new ethers.Contract(hhresell, NFTMarketResell, wallet); // Resell市场合约实例
     const itemArray: NftItem[] = []; // NFT数据临时数组
     const result = await contract.totalSupply() // 获取NFT总数
     for (let i = 0; i < result; i++) { // 遍历所有NFT
@@ -58,6 +59,45 @@ export default function Home() {
       await new Promise(r => setTimeout(r, 3000)); // 等待3秒（模拟加载）
     }
     hhResellNfts(itemArray) // 设置NFT列表
+  }
+  const loadNewSaleNFTs = async () => {
+    const hhPrivkey = simpleCrypto.decrypt(cipherHH) as string
+    const provider = new ethers.JsonRpcProvider(mainnet)
+    const wallet = new ethers.Wallet(hhPrivkey, provider);
+    const tokenContract = new ethers.Contract(hhnft, NFT, wallet)
+    const marketContract = new ethers.Contract(hhmarket, Market, wallet)
+    const data = await marketContract.getAvailableNft()
+    const items = await Promise.all(data.map(async (i: any) => {
+      const tokenUri = await tokenContract.tokenURI(i.tokenId)
+      const res = await fetch(tokenUri)
+      const { image, name, description, } = await res.json()
+      let price = ethers.formatUnits(i.price.toString(), 'ether')
+      let item = {
+        price,
+        tokenId: i.tokenId,
+        seller: i.seller,
+        owner: i.owner,
+        img: image,
+        name: name,
+        description: description,
+      }
+      return item
+    }))
+    hhsetNfts(items)
+  }
+
+  const buyNewNft = async (nft: NftItem & { price: string }) => {
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.BrowserProvider(connection)
+    const signer = await provider.getSigner()
+    const contract = new ethers.Contract(hhmarket, Market, signer)
+    const price = ethers.parseUnits(nft.price.toString(), 'ether')
+    const transaction = await contract.n2DMarketSale(hhnft, nft.tokenId, {
+      value: price
+    })
+    await transaction.wait()
+    loadNewSaleNFTs()
   }
 
   // 轮播图响应式配置
@@ -127,7 +167,7 @@ export default function Home() {
                 const connection = await web3Modal.connect() // 连接钱包
                 const provider = new ethers.BrowserProvider(connection) // 创建provider
                 const signer = await provider.getSigner() // 获取签名者
-                const contract = new ethers.Contract(hhresell, Resell, signer) // Resell合约实例
+                const contract = new ethers.Contract(hhresell, NFTMarketResell, signer) // Resell合约实例
                 const transaction = await contract.buyNft(nft.tokenId, { value: nft.cost }) // 购买NFT
                 await transaction.wait() // 等待交易完成
                 router.push('/portal') // 跳转到portal页面
@@ -140,6 +180,29 @@ export default function Home() {
                   <div className="text-[30px] bg-gradient-to-r from-[#922DFC] to-[#12DED2] font-bold bg-gradient-to-right bg-clip-text text-transparent mb-2 flex items-center">{nft.val} ETH</div> {/* NFT价格 */}
                   <Button color="secondary" className="text-[20px] w-full" onPress={() => {
                     buylistNft() // 购买NFT
+                    confetti(); // 播放彩带动画
+                  }}>Buy</Button>
+                </div>
+              )
+            })
+          }
+        </div>
+      </div>
+      <div className="max-w-[1200px] mx-auto mt-6 mb-6 px-4">
+        <div className="mt-6 mb-6">
+          <h3 className="text-[1.5rem] font-bold text-[#222]">Latest NFT&apos;s on Ethereum</h3> {/* 最新NFT标题 */}
+        </div>
+        <div className="flex flex-wrap gap-6">
+          {
+            hhnfts.slice(0, 9).map((nft, id) => {
+              return (
+                <div key={id} className="w-1/3 min-w-[260px] bg-white rounded-xl shadow-md p-4 flex flex-col items-center">
+                  <div className="text-black font-bold font-sans text-[20px] mb-2">{nft.name} Token-{nft.tokenId}</div> {/* NFT名称和编号 */}
+                  <HeroImage className="max-w-[150px] rounded-lg mb-2" src={nft.img} alt={nft.name || 'NFT'} /> {/* NFT图片 */}
+                  <div className="text-[#666] text-[15px] mb-2 text-left w-full">{nft.desc}</div> {/* NFT描述 */}
+                  <div className="text-[30px] bg-gradient-to-r from-[#922DFC] to-[#12DED2] font-bold bg-gradient-to-right bg-clip-text text-transparent mb-2 flex items-center">{nft.val} ETH</div> {/* NFT价格 */}
+                  <Button color="secondary" className="text-[20px] w-full" onPress={() => {
+                    buyNewNft(nft) // 购买NFT
                     confetti(); // 播放彩带动画
                   }}>Buy</Button>
                 </div>
