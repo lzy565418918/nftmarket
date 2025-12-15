@@ -5,6 +5,7 @@
 import { Providers } from "./providers";
 import Link from 'next/link';
 import { Button } from '@heroui/react';
+import ConnectChain from '@/engine/connectchain'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/portal">
               <Button color="primary">my portal</Button>
             </Link>
+            <ConnectChain />
           </div>
           {children}
         </Providers>
