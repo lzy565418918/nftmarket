@@ -1,5 +1,8 @@
 export async function bscChain() {
 	try {
+		// 钱包在安装启用后会向window注入ethereum全局变量，遵循 EIP-1193/EIP-3326/EIP-3085 标准，处理 “链未添加（4902 错误）” 的兜底逻辑
+		// 冻结核心属性：Object.freeze(window.ethereum) 禁止修改 request、on 等核心方法，发起请求后必须通过钱包UI页面手动操作
+		// 一定程度上避免了被黑客无感知盗取财产
 		await window.ethereum.request({
 			method: 'wallet_switchEthereumChain',
 			params: [{ chainId: '0x38' }],
