@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'; // React 状态和生命周期钩�
 import Web3Modal from "web3modal"; // 钱包连接弹窗库
 import { useRouter } from 'next/navigation'; // Next.js 路由跳转
 import { NFTMarketResell, Collection, NFT, Market } from '@/abis' // NFTCollection 合约 ABI
-import { Button, Spacer, Image as HeroImage } from '@heroui/react'; // heroui 组件库
+import { Button, Spacer, Image as HeroImage, Spinner } from '@heroui/react'; // heroui 组件库
 import { hhnft, hhmarket, hhresell, hhnftcol, mainnet } from '@/engine/configuration'; // 合约地址和网络配置
 import { cipherHH, simpleCrypto } from '@/engine/configuration'; // 加密配置
 import confetti from 'canvas-confetti'; // 彩带动画库
@@ -17,6 +17,7 @@ import { NftItem } from '@/utils/types' // NFT 数据类型
 export default function Home() {
   const [hhlist, hhResellNfts] = useState<NftItem[]>([]) // NFT 列表
   const [hhnfts, hhsetNfts] = useState<(NftItem & { price: string })[]>([]) // NFT 列表
+  const [loading, setLoading] = useState(true) // 加载状态
   useEffect(() => {
     loadHardHatResell() // 页面加载时获取NFT列表
     loadNewSaleNFTs()
@@ -264,30 +265,71 @@ export default function Home() {
           </div>
         )}
       </div>
-      <div className="max-w-[1200px] mx-auto mt-6 mb-6 px-4">
-        <div className="mt-6 mb-6">
-          <h3 className="text-[1.5rem] font-bold text-[#222]">Latest NFT&apos;s on Ethereum</h3> {/* 最新NFT标题 */}
+      {/* New NFT Section */}
+      <div className="max-w-[1200px] mx-auto mt-12 mb-12 px-4">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2">Latest NFT&apos;s on Ethereum</h2>
+          <p className="text-gray-400">Fresh mints available for purchase</p>
         </div>
-        <div className="flex flex-wrap gap-6">
-          {
-            hhnfts.slice(0, 9).map((nft, id) => {
-              return (
-                <div key={id} className="w-1/3 min-w-[260px] bg-white rounded-xl shadow-md p-4 flex flex-col items-center">
-                  <div className="text-black font-bold font-sans text-[20px] mb-2">{nft.name} Token-{nft.tokenId}</div> {/* NFT名称和编号 */}
-                  <HeroImage className="max-w-[150px] rounded-lg mb-2" src={nft.img} alt={nft.name || 'NFT'} /> {/* NFT图片 */}
-                  <div className="text-[#666] text-[15px] mb-2 text-left w-full">{nft.desc}</div> {/* NFT描述 */}
-                  <div className="text-[30px] bg-gradient-to-r from-[#922DFC] to-[#12DED2] font-bold bg-gradient-to-right bg-clip-text text-transparent mb-2 flex items-center">{nft.val} ETH</div> {/* NFT价格 */}
-                  <Button color="secondary" className="text-[20px] w-full" onPress={() => {
-                    buyNewNft(nft) // 购买NFT
-                    confetti(); // 播放彩带动画
-                  }}>Buy</Button>
+
+        {hhnfts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {hhnfts.slice(0, 9).map((nft, id) => (
+              <div
+                key={id}
+                className="nft-card rounded-2xl p-5 flex flex-col"
+              >
+                {/* NFT 图片 */}
+                <div className="relative mb-4 rounded-xl overflow-hidden group">
+                  <HeroImage
+                    className="w-full h-[220px] object-cover transition-transform duration-300 group-hover:scale-110"
+                    src={nft.img}
+                    alt={nft.name || 'NFT'}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-              )
-            })
-          }
-        </div>
+
+                {/* NFT 信息 */}
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-white font-bold text-lg truncate">{nft.name}</h3>
+                    <span className="text-purple-400 text-sm font-mono">#{String(nft.tokenId)}</span>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">{nft.desc}</p>
+                </div>
+
+                {/* 价格和购买按钮 */}
+                <div className="border-t border-purple-500/20 pt-4 mt-auto">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-500 text-xs uppercase tracking-wider">Price</p>
+                      <p className="gradient-text text-xl font-bold">{nft.price} ETH</p>
+                    </div>
+                    <Button
+                      className="bg-gradient-to-r from-purple-500 to-cyan-400 text-white font-semibold px-6 hover:opacity-90 transition-all hover:scale-105"
+                      onPress={() => {
+                        buyNewNft(nft)
+                        confetti({
+                          particleCount: 100,
+                          spread: 70,
+                          origin: { y: 0.6 }
+                        })
+                      }}
+                    >
+                      Buy Now
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-xl">No new NFTs available</p>
+          </div>
+        )}
       </div>
-      <Spacer></Spacer> {/* 页面底部间距 */}
+      <Spacer y={8} /> {/* 页面底部间距 */}
     </div>
   )
 }
