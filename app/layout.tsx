@@ -2,10 +2,10 @@
 
 // globals.css includes @tailwind directives
 // adjust the path if necessary
-import "./globals.css";
 import { Providers } from "./providers";
 import Link from 'next/link';
 import { Button } from '@heroui/react';
+import ConnectChain from '@/engine/connectchain'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -36,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     My Portal
                   </Button>
                 </Link>
+                <ConnectChain />
               </div>
             </div>
           </nav>

@@ -1072,6 +1072,7 @@ export const Collection = [
 		"type": "function"
 	}
 ] as const
+// NFT创建
 export const NFT = [
 	{
 		"inputs": [
@@ -1708,6 +1709,7 @@ export const NFT = [
 		"type": "function"
 	}
 ] as const
+// NFT市场
 export const Market = [
 	{
 		"inputs": [
