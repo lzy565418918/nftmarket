@@ -5,7 +5,7 @@ import Web3Modal from "web3modal"; // 钱包连接弹窗库
 import { useRouter } from 'next/navigation'; // Next.js 路由跳转
 import NFTCollection from '@/engine/NFTCollection.json' // NFTCollection 合约 ABI
 import Resell from '@/engine/Resell.json'; // Resell 合约 ABI
-import { Button, Spacer, Image as HeroImage } from '@heroui/react'; // heroui 组件库
+import { Button, Spacer, Image as HeroImage, Spinner } from '@heroui/react'; // heroui 组件库
 import { hhresell, hhnftcol, mainnet } from '@/engine/configuration'; // 合约地址和网络配置
 import { cipherHH, simpleCrypto } from '@/engine/configuration'; // 加密配置
 import confetti from 'canvas-confetti'; // 彩带动画库
@@ -17,6 +17,7 @@ import { NftItem } from '@/utils/types' // NFT 数据类型
 // 首页主组件
 export default function Home() {
   const [hhlist, hhResellNfts] = useState<NftItem[]>([]) // NFT 列表
+  const [loading, setLoading] = useState(true) // 加载状态
   useEffect(() => {
     loadHardHatResell() // 页面加载时获取NFT列表
   }, []) // 只在首次渲染时执行
@@ -24,6 +25,7 @@ export default function Home() {
 
   // 获取HardHat链上的Resell NFT列表
   const loadHardHatResell = async () => {
+    setLoading(true)
     const provider = new ethers.JsonRpcProvider(mainnet) // 创建RPC提供者
     const key = simpleCrypto.decrypt(cipherHH) as string // 解密私钥
     const wallet = new ethers.Wallet(key, provider); // 创建钱包实例
@@ -58,6 +60,7 @@ export default function Home() {
       await new Promise(r => setTimeout(r, 3000)); // 等待3秒（模拟加载）
     }
     hhResellNfts(itemArray) // 设置NFT列表
+    setLoading(false)
   }
 
   // 轮播图响应式配置
@@ -80,47 +83,85 @@ export default function Home() {
   };
   // 页面渲染
   return (
-    <div>
-      <div>
-        <div className="w-full" style={{ backgroundImage: 'linear-gradient(to top, #020202, #050505, #080808, #0b0b0b, #0e0e0e, #16141a, #1e1724, #291a2d, #451a3a, #64133c, #820334, #9b0022)' }}>
-          <div className="mb-6 max-w-[1200px] mx-auto">
-            <h2 className="ml-40 text-white text-2xl font-bold">Top Collections</h2> {/* 顶部标题 */}
-            <Carousel
-              swipeable={false}
-              draggable={false}
-              showDots={true}
-              responsive={responsive}
-              ssr={true}
-              infinite={true}
-              autoPlay={true}
-              autoPlaySpeed={6000}
-              keyBoardControl={true}
-              customTransition="all .5"
-              transitionDuration={800}
-              containerClass="carousel-container"
-              removeArrowOnDeviceType={["tablet", "mobile"]}
-              dotListClass="custom-dot-list-style"
-              itemClass="carousel-item-padding-60-px"
-            >
-              {/* 轮播展示所有NFT图片 */}
-              {
-                hhlist.map((nft, i) => (
-                  <div key={i} className="flex justify-center items-center">
-                    <HeroImage className="ml-16 max-w-[450px] rounded-xl" src={nft.img} alt={nft.name || 'NFT'} />
+    <div className="min-h-screen">
+      {/* Hero Section with Carousel */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-transparent to-transparent pointer-events-none" />
+        <div className="py-12">
+          <div className="max-w-[1200px] mx-auto px-4">
+            <div className="text-center mb-8">
+              <h1 className="gradient-text text-4xl md:text-5xl font-bold mb-4">
+                Discover Unique NFTs
+              </h1>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Explore, collect, and trade extraordinary digital art from creators worldwide
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Spinner size="lg" color="secondary" />
+                <p className="text-gray-400 mt-4">Loading NFTs...</p>
+              </div>
+            ) : hhlist.length > 0 ? (
+              <Carousel
+                swipeable={true}
+                draggable={true}
+                showDots={true}
+                responsive={responsive}
+                ssr={true}
+                infinite={true}
+                autoPlay={true}
+                autoPlaySpeed={5000}
+                keyBoardControl={true}
+                customTransition="transform 500ms ease-in-out"
+                transitionDuration={500}
+                containerClass="carousel-container"
+                removeArrowOnDeviceType={["tablet", "mobile"]}
+                dotListClass="custom-dot-list-style"
+                itemClass="px-4"
+              >
+                {hhlist.map((nft, i) => (
+                  <div key={i} className="flex justify-center items-center py-8">
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-cyan-400 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
+                      <HeroImage
+                        className="relative max-w-[400px] max-h-[400px] rounded-2xl object-cover"
+                        src={nft.img}
+                        alt={nft.name || 'NFT'}
+                      />
+                    </div>
                   </div>
-                ))
-              }
-            </Carousel>
+                ))}
+              </Carousel>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-gray-400 text-xl">No NFTs available</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      <div className="max-w-[1200px] mx-auto mt-6 mb-6 px-4">
-        <div className="mt-6 mb-6">
-          <h3 className="text-[1.5rem] font-bold text-[#222]">Latest NFT&apos;s</h3> {/* 最新NFT标题 */}
+
+      {/* NFT Grid Section */}
+      <div className="max-w-[1200px] mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-2">Latest NFTs</h2>
+            <p className="text-gray-400">Discover the newest additions to our marketplace</p>
+          </div>
+          <div className="hidden md:block">
+            <span className="text-purple-400 font-semibold">{hhlist.length} items</span>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-6">
-          {
-            hhlist.slice(0, 9).map((nft, id) => {
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Spinner size="lg" color="secondary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {hhlist.slice(0, 9).map((nft, id) => {
               // 购买NFT函数
               async function buylistNft() {
                 const web3Modal = new Web3Modal() // 创建钱包弹窗
@@ -133,22 +174,58 @@ export default function Home() {
                 router.push('/portal') // 跳转到portal页面
               }
               return (
-                <div key={id} className="w-1/3 min-w-[260px] bg-white rounded-xl shadow-md p-4 flex flex-col items-center">
-                  <div className="text-black font-bold font-sans text-[20px] mb-2">{nft.name} Token-{nft.tokenId}</div> {/* NFT名称和编号 */}
-                  <HeroImage className="max-w-[150px] rounded-lg mb-2" src={nft.img} alt={nft.name || 'NFT'} /> {/* NFT图片 */}
-                  <div className="text-[#666] text-[15px] mb-2 text-left w-full">{nft.desc}</div> {/* NFT描述 */}
-                  <div className="text-[30px] bg-gradient-to-r from-[#922DFC] to-[#12DED2] font-bold bg-gradient-to-right bg-clip-text text-transparent mb-2 flex items-center">{nft.val} ETH</div> {/* NFT价格 */}
-                  <Button color="secondary" className="text-[20px] w-full" onPress={() => {
-                    buylistNft() // 购买NFT
-                    confetti(); // 播放彩带动画
-                  }}>Buy</Button>
+                <div
+                  key={id}
+                  className="nft-card rounded-2xl p-5 flex flex-col"
+                >
+                  {/* NFT 图片 */}
+                  <div className="relative mb-4 rounded-xl overflow-hidden group">
+                    <HeroImage
+                      className="w-full h-[220px] object-cover transition-transform duration-300 group-hover:scale-110"
+                      src={nft.img}
+                      alt={nft.name || 'NFT'}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+
+                  {/* NFT 信息 */}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-white font-bold text-lg truncate">{nft.name}</h3>
+                      <span className="text-purple-400 text-sm font-mono">#{nft.tokenId}</span>
+                    </div>
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{nft.desc}</p>
+                  </div>
+
+                  {/* 价格和购买按钮 */}
+                  <div className="border-t border-purple-500/20 pt-4 mt-auto">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-gray-500 text-xs uppercase tracking-wider">Price</p>
+                        <p className="gradient-text text-xl font-bold">{nft.val} ETH</p>
+                      </div>
+                      <Button
+                        className="bg-gradient-to-r from-purple-500 to-cyan-400 text-white font-semibold px-6 hover:opacity-90 transition-all hover:scale-105"
+                        onPress={() => {
+                          buylistNft()
+                          confetti({
+                            particleCount: 100,
+                            spread: 70,
+                            origin: { y: 0.6 }
+                          })
+                        }}
+                      >
+                        Buy Now
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )
-            })
-          }
-        </div>
+            })}
+          </div>
+        )}
       </div>
-      <Spacer></Spacer> {/* 页面底部间距 */}
+      <Spacer y={8} />
     </div>
   )
 }

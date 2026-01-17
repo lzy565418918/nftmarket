@@ -1,8 +1,11 @@
 @import 'tailwindcss';
 
 :root {
-	--background: #ffffff;
-	--foreground: #171717;
+	--background: #0f0f1a;
+	--foreground: #ededed;
+	--primary: #8b5cf6;
+	--secondary: #06b6d4;
+	--accent: #f472b6;
 }
 
 @theme inline {
@@ -14,7 +17,7 @@
 
 @media (prefers-color-scheme: dark) {
 	:root {
-		--background: #0a0a0a;
+		--background: #0f0f1a;
 		--foreground: #ededed;
 	}
 }
@@ -24,5 +27,81 @@
 @custom-variant dark (&:is(.dark *));
 
 body {
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+	background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+	min-height: 100vh;
+}
+
+/* NFT 卡片悬停效果 */
+.nft-card {
+	transition: all 0.3s ease;
+	background: linear-gradient(145deg, #1a1a2e, #252545);
+	border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.nft-card:hover {
+	transform: translateY(-8px);
+	box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+	border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* 渐变文字 */
+.gradient-text {
+	background: linear-gradient(90deg, #8b5cf6, #06b6d4, #f472b6);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* 导航栏样式 */
+.navbar {
+	background: rgba(15, 15, 26, 0.8);
+	backdrop-filter: blur(20px);
+	border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* 按钮光晕效果 */
+.glow-button {
+	position: relative;
+	overflow: hidden;
+}
+
+.glow-button::before {
+	content: '';
+	position: absolute;
+	inset: -2px;
+	background: linear-gradient(90deg, #8b5cf6, #06b6d4, #f472b6, #8b5cf6);
+	background-size: 300% 100%;
+	animation: glow 3s linear infinite;
+	border-radius: inherit;
+	z-index: -1;
+	opacity: 0;
+	transition: opacity 0.3s;
+}
+
+.glow-button:hover::before {
+	opacity: 1;
+}
+
+@keyframes glow {
+	0% { background-position: 0% 50%; }
+	100% { background-position: 300% 50%; }
+}
+
+/* 轮播图自定义样式 */
+.carousel-container {
+	padding-bottom: 30px;
+}
+
+.custom-dot-list-style {
+	bottom: 0;
+}
+
+.custom-dot-list-style li button {
+	border: none;
+	background: rgba(139, 92, 246, 0.4);
+}
+
+.custom-dot-list-style li.react-multi-carousel-dot--active button {
+	background: #8b5cf6;
 }
